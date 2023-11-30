@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spaced Repetition Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #quiz-container {
+            max-width: 600px;
+            margin: auto;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        #choices-form {
+            margin-top: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #summary-container {
+            margin-top: 20px;
+        }
+
+        #repeat-questions {
+            font-weight: bold;
+            color: #ffffff;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="quiz-container">
+        <h1>Spaced Repetition Quiz</h1>
+        <div id="question-container">
+            <p id="question"></p>
+            <form id="choices-form">
+                <label>
+                    <input type="radio" name="choice" value="A" id="radioA"> <span id="choiceA"></span>
+                </label>
+                <label>
+                    <input type="radio" name="choice" value="B" id="radioB"> <span id="choiceB"></span>
+                </label>
+                <label>
+                    <input type="radio" name="choice" value="C" id="radioC"> <span id="choiceC"></span>
+                </label>
+                <button type="button" onclick="checkAnswer()">Submit Answer</button>
+            </form>
+        </div>
+    </div>
+    <div id="summary-container">
+        <h2>Summary</h2>
+        <p id="summary"></p>
+        <button id="repeat-questions" onclick="repeatIncorrectQuestions()">Repeat Incorrect Questions</button>
+    </div>
+    <script>
+        const quizData = [
+            {
+                question: 'What is the capital of France?',
+                choices: ['A. Berlin', 'B. Madrid', 'C. Paris'],
+                correctAnswer: 'C'
+            },
+            {
+                question: 'Who wrote Romeo and Juliet?',
+                choices: ['A. Charles Dickens', 'B. Jane Austen', 'C. William Shakespeare'],
+                correctAnswer: 'C'
+            },
+            {
+                question: 'What is the largest planet in our solar system?',
+                choices: ['A. Venus', 'B. Jupiter', 'C. Mars'],
+                correctAnswer: 'B'
+            },
+            {
+                question: 'Which programming language is known for its use in web development?',
+                choices: ['A. Java', 'B. Python', 'C. JavaScript'],
+                correctAnswer: 'C'
+            },
+            {
+                question: 'In which year did the Titanic sink?',
+                choices: ['A. 1905', 'B. 1912', 'C. 1920'],
+                correctAnswer: 'B'
+            },
+        ];
+
+        let currentIndex = 0;
+        let incorrectQuestions = [];
+
+        function displayQuestion() {
+            const currentQuestion = quizData[currentIndex];
+            document.getElementById('question').innerText = currentQuestion.question;
+            document.getElementById('choiceA').innerText = currentQuestion.choices[0];
+            document.getElementById('choiceB').innerText = currentQuestion.choices[1];
+            document.getElementById('choiceC').innerText = currentQuestion.choices[2];
+            document.querySelectorAll('input[name="choice"]').forEach(input => input.checked = false);
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.querySelector('input[name="choice"]:checked');
+            if (!userAnswer) {
+                alert('Please select an answer.');
+                return;
+            }
+
+            const currentQuestion = quizData[currentIndex];
+            if (userAnswer.value !== currentQuestion.correctAnswer) {
+                // Incorrect answer, add to the list of incorrect questions
+                incorrectQuestions.push(currentQuestion);
+            }
+
+            // Move to the next question
+            currentIndex = (currentIndex + 1) % quizData.length;
+
+            // Check if quiz is completed
+            if (currentIndex === 0) {
+                showSummary();
+            } else {
+                displayQuestion();
+            }
+        }
+
+        function showSummary() {
+            const summaryElement = document.getElementById('summary');
+            const repeatButton = document.getElementById('repeat-questions');
+
+            if (incorrectQuestions.length === 0) {
+                summaryElement.innerText = 'Congratulations! You answered all questions correctly.';
+                repeatButton.style.display = 'none';
+            } else {
+                const summaryText = 'You got the following questions wrong:';
+                summaryElement.innerHTML = `<p>${summaryText}</p>`;
+                incorrectQuestions.forEach((question, index) => {
+                    summaryElement.innerHTML += `<p>${index + 1}. ${question.question}</p>`;
+                });
+                repeatButton.style.display = 'block';
+            }
+
+            document.getElementById('summary-container').style.display = 'block';
+        }
+
+        function repeatIncorrectQuestions() {
+            // Reset quiz and repeat only incorrect questions
+            currentIndex = 0;
+            const repeatData = incorrectQuestions.slice(); // Create a copy
+            incorrectQuestions = [];
+            document.getElementById('summary-container').style.display = 'none';
+
+            quizData.length = 0; // Clear the original quiz data array
+
+            // Set quizData to only contain incorrect questions
+            quizData.push(...repeatData);
+
+            displayQuestion();
+        }
+
+        // Initialize the quiz
+        displayQuestion();
+    </script>
+</body>
+</html>
+
+
